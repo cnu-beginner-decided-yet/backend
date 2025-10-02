@@ -1,4 +1,4 @@
-package com.example.blog.entity; // 패키징 인데 JAVA 특성이라 뭔지 모름
+package cnu.project.blog; // 패키징 인데 JAVA 특성이라 뭔지 모름
 
 import jakarta.persistence.*; // 파이썬 import 이건 entity, column쓸려고 
 import java.time.LocalDateTime; // 이건 밑에 글 작성 시점 저장
