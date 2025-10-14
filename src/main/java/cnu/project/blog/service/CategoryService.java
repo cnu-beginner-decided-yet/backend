@@ -68,7 +68,7 @@ public class CategoryService {
                 .orElseThrow(() -> new RuntimeException("카테고리 없음"));
         List<Post> posts = postRepository.findAll().stream()
                 .filter(post -> post.getCategory() != null && post.getCategory().getId().equals(categoryId))
-                .collect(Collectors.toList());
+                .toList();
         return posts.stream()
                 .map(post -> PostResponseDto.builder()
                         .id(post.getId())
