@@ -30,7 +30,7 @@ public class User {
     private String nickname;
 
     @Column // 특별한 제약 없음
-    private String organizattion;
+    private String organization;
 
     @Column(columnDefinition = "TEXT") // text 타입
     private String bio;

@@ -1,13 +1,13 @@
 package cnu.project.blog.user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @RestController // 이 클래스는 API 요청을 받는 컨트롤러
 @RequestMapping("/users") // 이 컨트롤러로 오는 모든 요청은 '/users' 주소로 시작
@@ -31,7 +31,7 @@ public class UserController {
     /** 
      * 로그인 API 엔드포인트
      * @param requestDto 로그인 요청 정보 (이메일, 비밀번호)
-     * @param respose HttpServletResponse 객체 (헤더 추가 위해)
+     * @param response HttpServletResponse 객체 (헤더 추가 위해)
      * @return 로그인 성공 시 임시 메시지
      */
     @PostMapping("/login")
@@ -45,5 +45,13 @@ public class UserController {
 
         // 3. 로그인 성공 응답 (Body는 비워두거나 간단한 메시지)
         return ResponseEntity.ok("로그인 성공");
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<String> getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails != null){
+            return ResponseEntity.ok("인증된 사용자 이메일 : " + userDetails.getUsername());
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보 없음");
     }
 }

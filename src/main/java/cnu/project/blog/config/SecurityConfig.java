@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 
 @Configuration // 이 파일은 스프링의 '설정' 파일
 @EnableWebSecurity // 스프링 시큐리티를 활성화
@@ -44,10 +45,14 @@ public class SecurityConfig {
         // [HTTP 요청 권한 설정]
         http.authorizeHttpRequests(authz -> authz
                 // " /users/signup " 이 주소로 오는 요청은
-                .requestMatchers("/users/signup", "/users/login").permitAll() // 로그인 없이도 모두 허용(permit all)
+                .requestMatchers("/users/signup", "/users/login", "/h2-console/**").permitAll() // 로그인 없이도 모두 허용(permit all)
                 
                 // 그 외(anyRequest)의 모든 요청은
                 .anyRequest().authenticated() // 인증(로그인)이 필요
+        );
+
+        http.headers(headers->headers.
+                frameOptions(frameOptions -> frameOptions.sameOrigin())
         );
 
         http.addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
