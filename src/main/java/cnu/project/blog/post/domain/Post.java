@@ -1,4 +1,4 @@
-package cnu.project.blog.domain;
+package cnu.project.blog.post.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

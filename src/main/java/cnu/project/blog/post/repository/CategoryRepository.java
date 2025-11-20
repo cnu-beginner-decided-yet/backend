@@ -1,6 +1,6 @@
-package cnu.project.blog.repository;
+package cnu.project.blog.post.repository;
 
-import cnu.project.blog.domain.Category;
+import cnu.project.blog.post.domain.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

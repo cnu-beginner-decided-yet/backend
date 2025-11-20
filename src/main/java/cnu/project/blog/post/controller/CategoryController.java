@@ -1,8 +1,8 @@
-package cnu.project.blog.controller;
+package cnu.project.blog.post.controller;
 
-import cnu.project.blog.dto.CategoryDto;
-import cnu.project.blog.dto.PostResponseDto;
-import cnu.project.blog.service.CategoryService;
+import cnu.project.blog.post.dto.CategoryDto;
+import cnu.project.blog.post.dto.PostResponseDto;
+import cnu.project.blog.post.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
