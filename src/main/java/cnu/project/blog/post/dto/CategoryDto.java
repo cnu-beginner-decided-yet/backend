@@ -1,4 +1,4 @@
-package cnu.project.blog.dto;
+package cnu.project.blog.post.dto;
 
 import lombok.*;
 

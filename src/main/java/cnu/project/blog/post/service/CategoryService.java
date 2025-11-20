@@ -1,11 +1,11 @@
-package cnu.project.blog.service;
+package cnu.project.blog.post.service;
 
-import cnu.project.blog.domain.Category;
-import cnu.project.blog.domain.Post;
-import cnu.project.blog.dto.CategoryDto;
-import cnu.project.blog.dto.PostResponseDto;
-import cnu.project.blog.repository.CategoryRepository;
-import cnu.project.blog.repository.PostRepository;
+import cnu.project.blog.post.domain.Category;
+import cnu.project.blog.post.domain.Post;
+import cnu.project.blog.post.dto.CategoryDto;
+import cnu.project.blog.post.dto.PostResponseDto;
+import cnu.project.blog.post.repository.CategoryRepository;
+import cnu.project.blog.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

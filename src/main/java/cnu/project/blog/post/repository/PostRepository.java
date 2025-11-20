@@ -1,6 +1,6 @@
-package cnu.project.blog.repository;
+package cnu.project.blog.post.repository;
 
-import cnu.project.blog.domain.Post;
+import cnu.project.blog.post.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

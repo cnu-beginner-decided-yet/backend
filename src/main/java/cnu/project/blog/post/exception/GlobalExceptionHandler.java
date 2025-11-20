@@ -1,4 +1,4 @@
-package cnu.project.blog.exception;
+package cnu.project.blog.post.exception;
 
 public class GlobalExceptionHandler {
 }
