@@ -69,4 +69,40 @@ public class UserService {
         // 3. 로그인 성공 -> JWT 토큰 생성 및 반환
         return jwtUtil.createToken(user.getEmail()); // 사용자 이메일로 토큰 생성
     }
+
+    /**
+     * JWT에서 추출된 이메일 (사용자 식별자)을 사용하여
+     * DB에서 실제 User 엔티티를 찾고, 해당 User의 ID (Long)를 반환합니다.
+     *
+     * @param email JWT Payload의 subject에 저장된 사용자 이메일
+     * @return User 엔티티의 ID (Long)
+     * @throws IllegalArgumentException 해당 이메일의 사용자가 존재하지 않을 경우
+     */
+    public Long findUserIdByEmail(String email) {
+        // 1. 이메일을 통해 User를 조회합니다. (JWT Subject = email로 가정)
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+
+        // 2. User 엔티티에서 ID를 반환합니다.
+        return user.getId();
+    }
+
+    /**
+     * 이메일 (JWT Subject)을 사용하여 User 엔티티를 찾습니다.
+     */
+    @Transactional(readOnly = true)
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+    }
+
+    /**
+     * ID를 사용하여 User 엔티티를 찾습니다.
+     */
+    @Transactional(readOnly = true)
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+    }
+
 }

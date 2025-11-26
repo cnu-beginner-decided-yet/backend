@@ -6,6 +6,9 @@ import cnu.project.blog.post.dto.PostRequestDto;
 import cnu.project.blog.post.dto.PostResponseDto;
 import cnu.project.blog.post.repository.CategoryRepository;
 import cnu.project.blog.post.repository.PostRepository;
+import cnu.project.blog.user.User;
+import cnu.project.blog.user.UserRepository;
+import cnu.project.blog.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +27,16 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
+    private final UserService userService;
 
     // 게시글 생성
-    public PostResponseDto createPost(PostRequestDto requestDto) {
+    public PostResponseDto createPost(PostRequestDto requestDto, String author) {
         Category category = categoryRepository.findById(requestDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("카테고리 없음"));
+        User authorUser = userService.findUserByEmail(author);
 
         Post post = Post.builder()
+                .author(authorUser)
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
                 .tags(requestDto.getTags())
@@ -52,6 +58,17 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글 없음"));
         return toDto(post);
+    }
+
+    public List<PostResponseDto> findPostsByAuthorId(Long userId) {
+
+        // 1. userId를 사용하여 User 엔티티를 찾습니다.
+        User author = userService.findUserById(userId);
+
+        // 2. 해당 User 엔티티를 기준으로 게시글 목록을 조회합니다.
+        return postRepository.findAllByAuthor(author).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     // 게시글 수정
