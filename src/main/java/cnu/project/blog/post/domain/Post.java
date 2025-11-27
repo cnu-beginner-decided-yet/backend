@@ -33,7 +33,7 @@ public class Post {
     private List<String> tags = new ArrayList<>();
 
     public void setTags(List<String> tags) {
-    this.tags = tags.stream().map(t -> t.trim().toUpperCase()).filter(t -> !t.isBlank()).distinct().toList();
+        this.tags = tags.stream().map(t -> t.trim().toUpperCase()).filter(t -> !t.isBlank()).distinct().toList();
     }
 
     @ManyToOne
