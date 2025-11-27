@@ -42,10 +42,9 @@ public class PostService {
                 .author(authorUser)
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .tags(requestDto.getTags())
                 .category(category)
                 .build();
-
+        post.setTags(requestDto.getTags());
         return toDto(postRepository.save(post));
     }
 
