@@ -33,10 +33,9 @@ public class PostService {
         Post post = Post.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .tags(requestDto.getTags())
                 .category(category)
                 .build();
-
+        post.setTags(requestDto.getTags());
         return toDto(postRepository.save(post));
     }
 
