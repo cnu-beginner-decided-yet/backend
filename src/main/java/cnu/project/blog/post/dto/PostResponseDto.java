@@ -19,5 +19,5 @@ public class PostResponseDto {
     private String content;
     private List<String> tags;
     private String categoryName;
-    private int likes;
+    private long likes;
 }

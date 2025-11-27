@@ -41,7 +41,4 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩 설정
     @JoinColumn(name = "user_id") // DB 컬럼명을 user_id로 설정
     private User author;
-
-    @Builder.Default
-    private int likes = 0;  // 좋아요 수
 }

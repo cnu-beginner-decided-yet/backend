@@ -6,6 +6,8 @@ import cnu.project.blog.post.dto.PostRequestDto;
 import cnu.project.blog.post.dto.PostResponseDto;
 import cnu.project.blog.post.repository.CategoryRepository;
 import cnu.project.blog.post.repository.PostRepository;
+import cnu.project.blog.postlike.repository.PostLikeRepository;
+import cnu.project.blog.postlike.service.PostLikeService;
 import cnu.project.blog.user.User;
 import cnu.project.blog.user.UserRepository;
 import cnu.project.blog.user.UserService;
@@ -28,6 +30,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final UserService userService;
+    private final PostLikeRepository postLikeRepository;
 
     // 게시글 생성
     public PostResponseDto createPost(PostRequestDto requestDto, String author) {
@@ -94,20 +97,6 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
-    // 게시글 좋아요
-    public void likePost(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("게시글 없음"));
-        post.setLikes(post.getLikes() + 1);
-    }
-
-    // 게시글 좋아요 취소
-    public void unlikePost(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("게시글 없음"));
-        if (post.getLikes() > 0) post.setLikes(post.getLikes() - 1);
-    }
-
     // 제목 검색
     public List<PostResponseDto> searchByTitle(String keyword) {
         return postRepository.findByTitleContaining(keyword).stream()
@@ -137,7 +126,7 @@ public class PostService {
                 .content(post.getContent())
                 .tags(post.getTags())
                 .categoryName(post.getCategory() != null ? post.getCategory().getName() : null)
-                .likes(post.getLikes())
+                .likes(postLikeRepository.countByPost(post))
                 .build();
     }
 }

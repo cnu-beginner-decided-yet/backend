@@ -51,18 +51,6 @@ public class PostController {
         return "게시글 삭제 완료";
     }
 
-    @PostMapping("/{id}/like")
-    public String likePost(@PathVariable Long id) {
-        postService.likePost(id);
-        return "좋아요 처리 완료";
-    }
-
-    @PostMapping("/{id}/unlike")
-    public String unlikePost(@PathVariable Long id) {
-        postService.unlikePost(id);
-        return "좋아요 취소 완료";
-    }
-
     @GetMapping("/search/title")
     public List<PostResponseDto> searchByTitle(@RequestParam String keyword) {
         return postService.searchByTitle(keyword);
