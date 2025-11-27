@@ -33,6 +33,10 @@ public class Post {
     @Builder.Default
     private List<String> tags = new ArrayList<>();
 
+    public void setTags(List<String> tags) {
+        this.tags = tags.stream().map(t -> t.trim().toUpperCase()).filter(t -> !t.isBlank()).distinct().toList();
+    }
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
