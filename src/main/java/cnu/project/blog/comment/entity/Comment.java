@@ -1,6 +1,8 @@
 package cnu.project.blog.comment.entity;
 
 import cnu.project.blog.comment.dto.CommentRequestDto;
+import cnu.project.blog.post.domain.Post;
+import cnu.project.blog.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 

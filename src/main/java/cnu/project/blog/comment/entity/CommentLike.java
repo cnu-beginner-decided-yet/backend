@@ -1,5 +1,6 @@
 package cnu.project.blog.comment.entity;
 
+import cnu.project.blog.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
