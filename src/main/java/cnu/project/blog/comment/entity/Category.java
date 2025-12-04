@@ -1,4 +1,4 @@
-package hello.blog_clonecoding.comment.entity;
+package cnu.project.blog.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

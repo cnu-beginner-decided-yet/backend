@@ -1,13 +1,13 @@
-package hello.blog_clonecoding.comment.service;
+package cnu.project.blog.comment.service;
 
-import hello.blog_clonecoding.comment.dto.CommentRequestDto;
-import hello.blog_clonecoding.comment.dto.CommentResponseDto;
-import hello.blog_clonecoding.comment.entity.Comment;
-import hello.blog_clonecoding.comment.entity.Post;
-import hello.blog_clonecoding.comment.entity.User;
-import hello.blog_clonecoding.comment.repository.CommentRepository;
-import hello.blog_clonecoding.comment.repository.PostRepository;
-import hello.blog_clonecoding.comment.repository.UserRepository;
+import cnu.project.blog.comment.dto.CommentRequestDto;
+import cnu.project.blog.comment.dto.CommentResponseDto;
+import cnu.project.blog.comment.entity.Comment;
+import cnu.project.blog.comment.entity.Post;
+import cnu.project.blog.comment.entity.User;
+import cnu.project.blog.comment.repository.CommentRepository;
+import cnu.project.blog.comment.repository.PostRepository;
+import cnu.project.blog.comment.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

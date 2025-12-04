@@ -1,4 +1,4 @@
-package hello.blog_clonecoding.comment.dto;
+package cnu.project.blog.comment.dto;
 
 
 import lombok.*;

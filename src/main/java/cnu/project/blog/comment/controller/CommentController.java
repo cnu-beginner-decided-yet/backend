@@ -1,9 +1,9 @@
-package hello.blog_clonecoding.comment.controller;
+package cnu.project.blog.comment.controller;
 
 
-import hello.blog_clonecoding.comment.dto.CommentRequestDto;
-import hello.blog_clonecoding.comment.dto.CommentResponseDto;
-import hello.blog_clonecoding.comment.service.CommentService;
+import cnu.project.blog.comment.dto.CommentRequestDto;
+import cnu.project.blog.comment.dto.CommentResponseDto;
+import cnu.project.blog.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

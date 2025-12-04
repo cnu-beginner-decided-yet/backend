@@ -1,7 +1,7 @@
-package hello.blog_clonecoding.comment.dto;
+package cnu.project.blog.comment.dto;
 
 
-import hello.blog_clonecoding.comment.entity.Comment;
+import cnu.project.blog.comment.entity.Comment;
 import lombok.*;
 
 import java.util.List;

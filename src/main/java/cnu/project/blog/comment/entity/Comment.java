@@ -1,6 +1,6 @@
-package hello.blog_clonecoding.comment.entity;
+package cnu.project.blog.comment.entity;
 
-import hello.blog_clonecoding.comment.dto.CommentRequestDto;
+import cnu.project.blog.comment.dto.CommentRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
