@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <title>게시글 목록</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:24px auto;padding:0 16px}
+        header{display:flex;justify-content:space-between;align-items:center}
+        .controls{display:flex;gap:8px;align-items:center}
+        .post{border:1px solid #ddd;padding:12px;margin-top:12px;border-radius:6px}
+        .title{font-weight:700}
+        .meta{color:#666;font-size:13px;margin-top:6px}
+        button{padding:6px 10px}
+        form>input, form>textarea{width:100%;padding:8px;margin-top:6px}
+        .mini{width:auto;padding:6px 10px}
+    </style>
+</head>
+<body>
+<header>
+    <h1>게시글 목록</h1>
+    <div class="controls">
+        <button id="btnRefresh">새로고침</button>
+        <button id="btnCreateToggle">새 글 작성</button>
+        <button id="btnLogout">로그아웃</button>
+    </div>
+</header>
+
+<section id="createSection" style="display:none;margin-top:12px">
+    <h3>새 글 작성</h3>
+    <form id="createForm">
+        <input id="title" placeholder="제목" required />
+        <textarea id="content" placeholder="내용" rows="6" required></textarea>
+        <input id="tags" placeholder="태그 (쉼표로 구분)" />
+        <input id="categoryId" type="number" placeholder="카테고리 ID (선택)" />
+        <button type="submit">작성</button>
+        <div id="createMsg" style="margin-top:8px;color:green"></div>
+        <div id="createErr" style="margin-top:8px;color:red"></div>
+    </form>
+</section>
+
+<section style="margin-top:16px">
+    <div style="display:flex;gap:8px">
+        <input id="searchTitle" placeholder="제목으로 검색" />
+        <button id="btnSearchTitle" class="mini">검색</button>
+
+        <input id="searchContent" placeholder="내용으로 검색" />
+        <button id="btnSearchContent" class="mini">검색</button>
+
+        <input id="searchTag" placeholder="태그로 검색" />
+        <button id="btnSearchTag" class="mini">검색</button>
+    </div>
+</section>
+
+<main id="postList"></main>
+
+<script>
+    const BASE_URL = 'http://localhost:8080';
+    const postListEl = document.getElementById('postList');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const btnCreateToggle = document.getElementById('btnCreateToggle');
+    const createSection = document.getElementById('createSection');
+    const createForm = document.getElementById('createForm');
+    const btnLogout = document.getElementById('btnLogout');
+
+    const getToken = () => localStorage.getItem('jwt_token');
+
+    async function loadPosts(url = BASE_URL + '/api/posts') {
+        postListEl.innerHTML = '로딩 중...';
+        try {
+            const res = await fetch(url);
+            if (!res.ok) {
+                postListEl.innerHTML = '게시글을 불러오지 못했습니다.';
+                return;
+            }
+            const posts = await res.json();
+            renderPosts(posts);
+        } catch(e) {
+            postListEl.innerHTML = '네트워크 오류';
+        }
+    }
+
+    function renderPosts(posts) {
+        if (!posts || posts.length === 0) {
+            postListEl.innerHTML = '<p>게시글이 없습니다.</p>';
+            return;
+        }
+        postListEl.innerHTML = '';
+        posts.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'post';
+            div.innerHTML = `
+          <div class="title">${escapeHtml(p.title || '(제목 없음)')}</div>
+          <div class="meta">작성자: ${escapeHtml((p.authorName || p.author || '알 수 없음'))}
+            | 좋아요: <span data-like-count>${p.likeCount ?? p.likes ?? 0}</span>
+            | ID: ${p.id ?? ''}
+          </div>
+          <div style="margin-top:8px">${escapeHtml((p.content || '')).substring(0,500)}</div>
+          <div style="margin-top:8px">
+            <button class="btn-like">좋아요</button>
+            <button class="btn-unlike">좋아요 취소</button>
+            <button class="btn-view">상세보기</button>
+            <button class="btn-delete">삭제</button>
+          </div>
+        `;
+            const likeBtn = div.querySelector('.btn-like');
+            const unlikeBtn = div.querySelector('.btn-unlike');
+            const viewBtn = div.querySelector('.btn-view');
+            const deleteBtn = div.querySelector('.btn-delete');
+            const likeCountEl = div.querySelector('[data-like-count]');
+
+            likeBtn.addEventListener('click', () => sendLike(p.id, true, likeCountEl));
+            unlikeBtn.addEventListener('click', () => sendLike(p.id, false, likeCountEl));
+            viewBtn.addEventListener('click', () => location.href = BASE_URL + `/api/posts/${p.id}`);
+            deleteBtn.addEventListener('click', () => deletePost(p.id));
+
+            postListEl.appendChild(div);
+        });
+    }
+
+    async function sendLike(postId, isLike, likeCountEl) {
+        const token = getToken();
+        if (!token) return alert('로그인이 필요합니다.');
+        const url = BASE_URL + `/api/posts/${postId}/${isLike ? 'like' : 'unlike'}`;
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                loadPosts();
+            } else {
+                const t = await res.text();
+                alert(t || '요청 실패');
+            }
+        } catch(e) {
+            alert('네트워크 오류');
+        }
+    }
+
+    async function deletePost(postId) {
+        const token = getToken();
+        if (!token) return alert('로그인이 필요합니다.');
+        if (!confirm('정말 삭제하시겠습니까?')) return;
+        try {
+            const res = await fetch(BASE_URL + `/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                alert('삭제 완료');
+                loadPosts();
+            } else {
+                const t = await res.text();
+                alert(t || '삭제 실패');
+            }
+        } catch(e) {
+            alert('네트워크 오류');
+        }
+    }
+
+    btnRefresh.addEventListener('click', () => loadPosts());
+    btnCreateToggle.addEventListener('click', () => {
+        createSection.style.display = createSection.style.display === 'none' ? 'block' : 'none';
+    });
+    btnLogout.addEventListener('click', () => {
+        localStorage.removeItem('jwt_token');
+        alert('로그아웃 되었습니다.');
+        location.href = BASE_URL + '/login.html';
+    });
+
+    createForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = getToken();
+        if (!token) return alert('로그인이 필요합니다.');
+
+        const body = {
+            title: document.getElementById('title').value.trim(),
+            content: document.getElementById('content').value.trim(),
+            tags: (document.getElementById('tags').value || '').split(',').map(s=>s.trim()).filter(Boolean),
+            categoryId: document.getElementById('categoryId').value ? Number(document.getElementById('categoryId').value) : null
+        };
+
+        try {
+            const res = await fetch(BASE_URL + '/api/posts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                document.getElementById('createMsg').textContent = '작성 완료';
+                document.getElementById('createErr').textContent = '';
+                createForm.reset();
+                loadPosts();
+            } else {
+                const t = await res.text();
+                document.getElementById('createErr').textContent = t || '작성 실패';
+            }
+        } catch(e) {
+            document.getElementById('createErr').textContent = '네트워크 오류';
+        }
+    });
+
+    document.getElementById('btnSearchTitle').addEventListener('click', () => {
+        const kw = document.getElementById('searchTitle').value.trim();
+        if (!kw) return loadPosts();
+        loadPosts(BASE_URL + `/api/posts/search/title?keyword=${encodeURIComponent(kw)}`);
+    });
+    document.getElementById('btnSearchContent').addEventListener('click', () => {
+        const kw = document.getElementById('searchContent').value.trim();
+        if (!kw) return loadPosts();
+        loadPosts(BASE_URL + `/api/posts/search/content?keyword=${encodeURIComponent(kw)}`);
+    });
+    document.getElementById('btnSearchTag').addEventListener('click', () => {
+        const kw = document.getElementById('searchTag').value.trim();
+        if (!kw) return loadPosts();
+        loadPosts(BASE_URL + `/api/posts/search/tag?tag=${encodeURIComponent(kw)}`);
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replaceAll('&','&amp;')
+            .replaceAll('<','&lt;')
+            .replaceAll('>','&gt;')
+            .replaceAll('"','&quot;')
+            .replaceAll("'",'&#39;');
+    }
+
+    loadPosts();
+</script>
+</body>
+</html>
