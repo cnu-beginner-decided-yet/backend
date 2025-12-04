@@ -126,6 +126,7 @@ public class PostService {
                 .tags(post.getTags())
                 .categoryName(post.getCategory() != null ? post.getCategory().getName() : null)
                 .likes(postLikeRepository.countByPost(post))
+                .author(post.getAuthor().getNickname())
                 .build();
     }
 }
