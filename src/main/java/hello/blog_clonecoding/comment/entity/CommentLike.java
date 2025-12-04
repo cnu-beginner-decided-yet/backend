@@ -1,7 +1,6 @@
-package hello.blog_clonecoding.entity;
+package hello.blog_clonecoding.comment.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

@@ -1,4 +1,4 @@
-package hello.blog_clonecoding.entity;
+package hello.blog_clonecoding.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

@@ -1,6 +1,6 @@
-package hello.blog_clonecoding.repository;
+package hello.blog_clonecoding.comment.repository;
 
-import hello.blog_clonecoding.entity.Post;
+import hello.blog_clonecoding.comment.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;

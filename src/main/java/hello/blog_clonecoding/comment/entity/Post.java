@@ -1,7 +1,8 @@
-package hello.blog_clonecoding.entity;
+package hello.blog_clonecoding.comment.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "posts")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Post extends BaseTimeEntity {
 
     @Id
@@ -29,16 +32,5 @@ public class Post extends BaseTimeEntity {
     private Category category;
 
     private boolean anonymous;
-
-
-    public Post(String title, String content, String imageUrl,
-                User user, Category category, boolean anonymous){
-        this.title = title;
-        this.content = content;
-        this.imageUrl = imageUrl;
-        this.user = user;
-        this.category = category;
-        this.anonymous = anonymous;
-    }
 
 }

@@ -1,12 +1,12 @@
-package hello.blog_clonecoding.entity;
+package hello.blog_clonecoding.comment.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class User extends BaseTimeEntity{
 
@@ -32,16 +34,5 @@ public class User extends BaseTimeEntity{
     private String bio;
 
     private boolean publicProfile;
-
-    public User(String email, String password, String nickname,
-                String organization, String bio,
-                boolean publicProfile){
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
-        this.organization = organization;
-        this.bio = bio;
-        this.publicProfile = publicProfile;
-    }
 
 }
