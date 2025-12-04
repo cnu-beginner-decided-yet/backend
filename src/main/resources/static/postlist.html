@@ -4,51 +4,50 @@
     <meta charset="utf-8" />
     <title>게시글 목록</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <style>
-        body{font-family:Arial,Helvetica,sans-serif;max-width:900px;margin:24px auto;padding:0 16px}
-        header{display:flex;justify-content:space-between;align-items:center}
-        .controls{display:flex;gap:8px;align-items:center}
-        .post{border:1px solid #ddd;padding:12px;margin-top:12px;border-radius:6px}
-        .title{font-weight:700}
-        .meta{color:#666;font-size:13px;margin-top:6px}
-        button{padding:6px 10px}
-        form>input, form>textarea{width:100%;padding:8px;margin-top:6px}
-        .mini{width:auto;padding:6px 10px}
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<header>
-    <h1>게시글 목록</h1>
+<body class="app">
+<div class="container">
+<header class="app-header">
+    <h1 class="app-title">게시글 목록</h1>
     <div class="controls">
-        <button id="btnRefresh">새로고침</button>
-        <button id="btnCreateToggle">새 글 작성</button>
-        <button id="btnLogout">로그아웃</button>
+        <button id="btnRefresh" class="btn small">새로고침</button>
+        <button id="btnCreateToggle" class="btn primary small">새 글 작성</button>
+        <button id="btnMypage" class="btn ghost small">마이페이지</button>
+        <button id="btnLogout" class="btn ghost small">로그아웃</button>
     </div>
 </header>
+<div id="categoryBtnBar" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;"></div>
 
-<section id="createSection" style="display:none;margin-top:12px">
+<section id="createSection" class="card" style="display:none;margin-top:12px">
     <h3>새 글 작성</h3>
-    <form id="createForm">
+    <form id="createForm" class="form-row">
         <input id="title" placeholder="제목" required />
         <textarea id="content" placeholder="내용" rows="6" required></textarea>
         <input id="tags" placeholder="태그 (쉼표로 구분)" />
         <input id="categoryId" type="number" placeholder="카테고리 ID (선택)" />
-        <button type="submit">작성</button>
-        <div id="createMsg" style="margin-top:8px;color:green"></div>
-        <div id="createErr" style="margin-top:8px;color:red"></div>
+        <button type="submit" class="btn primary">작성</button>
+        <div id="createMsg" class="msg"></div>
+        <div id="createErr" class="err"></div>
     </form>
 </section>
 
-<section style="margin-top:16px">
-    <div style="display:flex;gap:8px">
-        <input id="searchTitle" placeholder="제목으로 검색" />
-        <button id="btnSearchTitle" class="mini">검색</button>
+<section class="card mt-8">
+    <div class="controls">
+        <div style="flex:1;max-width:220px;">
+            <input id="searchTitle" class="search-input" placeholder="제목으로 검색" />
+        </div>
+        <button id="btnSearchTitle" class="btn mini primary" title="제목 검색">검색</button>
 
-        <input id="searchContent" placeholder="내용으로 검색" />
-        <button id="btnSearchContent" class="mini">검색</button>
+        <div style="flex:1;max-width:220px;">
+            <input id="searchContent" class="search-input" placeholder="내용으로 검색" />
+        </div>
+        <button id="btnSearchContent" class="btn mini primary" title="내용 검색">검색</button>
 
-        <input id="searchTag" placeholder="태그로 검색" />
-        <button id="btnSearchTag" class="mini">검색</button>
+        <div style="flex:1;max-width:180px;">
+            <input id="searchTag" class="search-input" placeholder="태그로 검색" />
+        </div>
+        <button id="btnSearchTag" class="btn mini primary" title="태그 검색">검색</button>
     </div>
 </section>
 
@@ -62,57 +61,86 @@
     const createSection = document.getElementById('createSection');
     const createForm = document.getElementById('createForm');
     const btnLogout = document.getElementById('btnLogout');
+    const btnMypage = document.getElementById('btnMypage');
 
     const getToken = () => localStorage.getItem('jwt_token');
 
+    function getAuthHeaders() {
+        const token = getToken();
+        return token ? { 'Authorization': 'Bearer ' + token } : {};
+    }
+
     async function loadPosts(url = BASE_URL + '/api/posts') {
-        postListEl.innerHTML = '로딩 중...';
+        postListEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;min-height:120px;">
+            <div style="margin:auto;text-align:center;">
+                <svg width='40' height='40' viewBox='0 0 48 48' fill='none' xmlns='http://www.w3.org/2000/svg' style='animation:spin 1s linear infinite;'>
+                    <circle cx='24' cy='24' r='20' stroke='#03c75a' stroke-width='6' stroke-linecap='round' stroke-dasharray='100 40'/>
+                </svg>
+                <div style='margin-top:10px;color:#03c75a;font-weight:600;font-size:1.08rem;'>불러오는 중...</div>
+            </div>
+        </div>`;
         try {
-            const res = await fetch(url);
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    ...getAuthHeaders()
+                }
+            });
             if (!res.ok) {
-                postListEl.innerHTML = '게시글을 불러오지 못했습니다.';
+                postListEl.innerHTML = `<div style='text-align:center;padding:32px 0;color:#888;font-size:1.15rem;'>게시글을 불러오지 못했습니다.</div>`;
                 return;
             }
             const posts = await res.json();
             renderPosts(posts);
         } catch(e) {
-            postListEl.innerHTML = '네트워크 오류';
+            postListEl.innerHTML = `<div style='text-align:center;padding:32px 0;color:#888;font-size:1.15rem;'>네트워크 오류</div>`;
         }
     }
 
     function renderPosts(posts) {
         if (!posts || posts.length === 0) {
-            postListEl.innerHTML = '<p>게시글이 없습니다.</p>';
+            postListEl.innerHTML = `<div style='text-align:center;padding:40px 0;color:#b6b8d6;font-size:1.18rem;font-weight:600;'>게시글이 없습니다.</div>`;
             return;
         }
         postListEl.innerHTML = '';
         posts.forEach(p => {
             const div = document.createElement('div');
-            div.className = 'post';
+            div.className = 'post fade-in';
+            div.style.cursor = 'pointer';
             div.innerHTML = `
-          <div class="title">${escapeHtml(p.title || '(제목 없음)')}</div>
-          <div class="meta">작성자: ${escapeHtml((p.authorName || p.author || '알 수 없음'))}
-            | 좋아요: <span data-like-count>${p.likeCount ?? p.likes ?? 0}</span>
-            | ID: ${p.id ?? ''}
+      <div style="display:flex;align-items:flex-start;gap:18px;">
+        <div class="avatar" style="width:48px;height:48px;border-radius:50%;background:#e6f9ee;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#03c75a;box-shadow:0 2px 8px rgba(3,199,90,0.08);">
+          ${p.authorName ? p.authorName[0].toUpperCase() : 'A'}
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-weight:600;color:#03c75a;">${escapeHtml(p.authorName || p.author || '알 수 없음')}</span>
+            <span style="color:#b6b8d6;font-size:.98em;">${p.createdAt ? p.createdAt : ''}</span>
           </div>
-          <div style="margin-top:8px">${escapeHtml((p.content || '')).substring(0,500)}</div>
-          <div style="margin-top:8px">
-            <button class="btn-like">좋아요</button>
-            <button class="btn-unlike">좋아요 취소</button>
-            <button class="btn-view">상세보기</button>
-            <button class="btn-delete">삭제</button>
+          <div class="title" style="font-size:1.18rem;font-weight:700;margin:6px 0 8px 0;color:#222;">${escapeHtml(p.title || '(제목 없음)')}</div>
+          <div class="excerpt" style="margin-bottom:10px;color:#222;">${escapeHtml((p.content || '')).substring(0,120)}${(p.content && p.content.length>120)?'...':''}</div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <button class="btn primary small btn-like" title="좋아요">좋아요 <span style="margin-left:4px;">${p.likeCount ?? p.likes ?? 0}</span></button>
+            <button class="btn secondary small btn-unlike" title="좋아요 취소">취소</button>
+            <button class="btn danger small btn-delete" title="삭제">삭제</button>
           </div>
-        `;
+        </div>
+      </div>
+    `;
+            // 카드 전체 클릭 시 상세 페이지 이동
+            div.addEventListener('click', (e) => {
+                // 버튼 클릭 시에는 상세 이동 막기
+                if (e.target.closest('button')) return;
+                window.location.href = `viewpost.html?id=${p.id}`;
+            });
             const likeBtn = div.querySelector('.btn-like');
             const unlikeBtn = div.querySelector('.btn-unlike');
-            const viewBtn = div.querySelector('.btn-view');
             const deleteBtn = div.querySelector('.btn-delete');
-            const likeCountEl = div.querySelector('[data-like-count]');
+            const likeCountEl = likeBtn.querySelector('span');
 
-            likeBtn.addEventListener('click', () => sendLike(p.id, true, likeCountEl));
-            unlikeBtn.addEventListener('click', () => sendLike(p.id, false, likeCountEl));
-            viewBtn.addEventListener('click', () => location.href = BASE_URL + `/api/posts/${p.id}`);
-            deleteBtn.addEventListener('click', () => deletePost(p.id));
+            likeBtn.addEventListener('click', (e) => { e.stopPropagation(); sendLike(p.id, true, likeCountEl); });
+            unlikeBtn.addEventListener('click', (e) => { e.stopPropagation(); sendLike(p.id, false, likeCountEl); });
+            deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deletePost(p.id); });
 
             postListEl.appendChild(div);
         });
@@ -159,14 +187,44 @@
         }
     }
 
+    async function loadCategoriesForBar() {
+        try {
+            const res = await fetch(BASE_URL + '/api/categories', { method: 'GET', headers: { ...getAuthHeaders() } });
+            if (!res.ok) return;
+            const categories = await res.json();
+            renderCategoryBtnBar(categories);
+        } catch(e) {}
+    }
+    function renderCategoryBtnBar(categories) {
+        const bar = document.getElementById('categoryBtnBar');
+        bar.innerHTML = '';
+        // 전체 보기 버튼
+        const allBtn = document.createElement('button');
+        allBtn.className = 'btn ghost small';
+        allBtn.textContent = '전체';
+        allBtn.onclick = () => loadPosts();
+        bar.appendChild(allBtn);
+        // 카테고리별 버튼
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'btn secondary small';
+            btn.textContent = cat.name || cat.title || `카테고리 ${cat.id}`;
+            btn.onclick = () => loadPosts(BASE_URL + `/api/categories/${cat.id}/posts`);
+            bar.appendChild(btn);
+        });
+    }
+
     btnRefresh.addEventListener('click', () => loadPosts());
     btnCreateToggle.addEventListener('click', () => {
-        createSection.style.display = createSection.style.display === 'none' ? 'block' : 'none';
+        window.location.href = 'createpost.html';
+    });
+    btnMypage.addEventListener('click', () => {
+        window.location.href = 'mypage.html';
     });
     btnLogout.addEventListener('click', () => {
         localStorage.removeItem('jwt_token');
         alert('로그아웃 되었습니다.');
-        location.href = BASE_URL + '/login.html';
+        window.location.href = 'login.html';
     });
 
     createForm.addEventListener('submit', async (e) => {
@@ -230,7 +288,10 @@
             .replaceAll("'",'&#39;');
     }
 
+    // 페이지 로드 시 게시글 및 카테고리 버튼 로드
     loadPosts();
+    loadCategoriesForBar();
 </script>
+</div>
 </body>
 </html>
