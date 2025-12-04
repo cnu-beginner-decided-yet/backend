@@ -61,6 +61,11 @@ public class PostController {
         return postService.searchByContent(keyword);
     }
 
+    @GetMapping("/search/{author_id}")
+    public List<PostResponseDto> searchByAuthor(@PathVariable Long author_id) {
+        return postService.findPostsByAuthorId(author_id);
+    }
+
     @GetMapping("/search/tag")
     public List<PostResponseDto> searchByTag(@RequestParam String tag) {
         return postService.searchByTag(tag);
