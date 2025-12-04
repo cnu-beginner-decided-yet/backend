@@ -23,10 +23,11 @@ public class CommentService {
     private final PostRepository postRepository;
 
 
-    public CommentResponseDto createComment(CommentRequestDto commentRequestDto){
+    public CommentResponseDto createComment(String userEmail, CommentRequestDto commentRequestDto){
 
         Post post = postRepository.findById(commentRequestDto.getPostId()).orElseThrow(()->new RuntimeException("Post not found."));
-        User user = userRepository.findById(commentRequestDto.getUserId()).orElseThrow(()->new RuntimeException("User not found."));
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Comment comment = Comment.builder()
                 .user(user)
@@ -68,9 +69,11 @@ public class CommentService {
     }
 
 
-    public List<CommentResponseDto> findCommentByUserId(Long userId){
+    public List<CommentResponseDto> findCommentByUserEmail(String userEmail){
 
-        List<Comment> commentList = commentRepository.findByUserId(userId);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        List<Comment> commentList = commentRepository.findByUserEmail(userEmail);
 
         return commentList.stream()
                 .map(comment -> CommentResponseDto.from(comment)
@@ -81,7 +84,7 @@ public class CommentService {
 
     public List<CommentResponseDto> findCommentByPostId(Long postId){
 
-        List<Comment> commentList = commentRepository.findByPostId(postId);
+        List<Comment> commentList = commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
 
         return commentList.stream()
                 .map(comment -> CommentResponseDto.from(comment)
