@@ -16,6 +16,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByTitleContaining(String keyword);
     List<Post> findByContentContaining(String keyword);
-    List<Post> findByTagsContaining(String tag);
     List<Post> findAllByAuthor(User author);
+    @Query("SELECT DISTINCT p FROM Post p JOIN p.tags t WHERE UPPER(t) = UPPER(:tag)")
+    List<Post> findByTagIgnoreCase(@Param("tag") String tag);
 }

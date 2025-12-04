@@ -112,7 +112,7 @@ public class PostService {
 
     // 태그 검색
     public List<PostResponseDto> searchByTag(String tag) {
-        return postRepository.findByTagsContaining(tag).stream()
+        return postRepository.findByTagIgnoreCase(tag).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
