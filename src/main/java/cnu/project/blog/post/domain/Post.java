@@ -1,5 +1,6 @@
 package cnu.project.blog.post.domain;
 
+import cnu.project.blog.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -40,6 +41,8 @@ public class Post {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Builder.Default
-    private int likes = 0;  // 좋아요 수
+    // 💡 작성자(User)와의 관계 추가
+    @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩 설정
+    @JoinColumn(name = "user_id") // DB 컬럼명을 user_id로 설정
+    private User author;
 }
