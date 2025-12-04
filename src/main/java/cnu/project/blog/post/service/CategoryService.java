@@ -6,6 +6,7 @@ import cnu.project.blog.post.dto.CategoryDto;
 import cnu.project.blog.post.dto.PostResponseDto;
 import cnu.project.blog.post.repository.CategoryRepository;
 import cnu.project.blog.post.repository.PostRepository;
+import cnu.project.blog.postlike.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
 
     // 카테고리 생성
     public CategoryDto createCategory(CategoryDto dto) {
@@ -76,7 +78,7 @@ public class CategoryService {
                         .content(post.getContent())
                         .tags(post.getTags())
                         .categoryName(post.getCategory().getName())
-                        .likes(post.getLikes())
+                        .likes(postLikeRepository.countByPost(post))
                         .build())
                 .collect(Collectors.toList());
     }

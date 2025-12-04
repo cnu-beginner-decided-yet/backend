@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <title>게시글 상세보기</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="app">
+<div class="container">
+<header class="app-header">
+    <h1 class="app-title">게시글 상세</h1>
+    <div class="controls">
+        <button id="btnBack" class="btn secondary small">목록으로</button>
+        <button id="btnMypage" class="btn ghost small">마이페이지</button>
+        <button id="btnLogout" class="btn ghost small">로그아웃</button>
+    </div>
+</header>
+<section class="card" id="postDetail">
+    <div id="postDetailContent" style="display:flex;align-items:center;justify-content:center;min-height:120px;">
+        <div id="loadingSpinner" style="display:block;margin:auto;text-align:center;">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="animation:spin 1s linear infinite;">
+                <circle cx="24" cy="24" r="20" stroke="#03c75a" stroke-width="6" stroke-linecap="round" stroke-dasharray="100 40"/>
+            </svg>
+            <div style="margin-top:12px;color:#03c75a;font-weight:600;font-size:1.08rem;">불러오는 중...</div>
+        </div>
+    </div>
+    <div id="postDetailMsg" class="msg"></div>
+    <div id="postDetailErr" class="err"></div>
+</section>
+
+<!-- 댓글 영역 -->
+<section class="card" id="commentSection" style="margin-top:18px;">
+    <h3 style="margin-bottom:10px;">댓글</h3>
+    <div id="commentList"></div>
+    <form id="commentForm" class="form-row" style="margin-top:16px;display:none;">
+        <textarea id="commentInput" placeholder="댓글을 입력하세요" rows="3" required style="resize:vertical;"></textarea>
+        <div class="controls mt-8">
+            <button type="submit" class="btn primary small">등록</button>
+        </div>
+        <div id="commentMsg" class="msg"></div>
+        <div id="commentErr" class="err"></div>
+    </form>
+    <div id="commentLoginMsg" class="err" style="display:none;">댓글 작성은 로그인 후 이용 가능합니다.</div>
+</section>
+<script>
+const BASE_URL = 'http://localhost:8080';
+const getToken = () => localStorage.getItem('jwt_token');
+function getAuthHeaders() {
+    const token = getToken();
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
+const postDetailContent = document.getElementById('postDetailContent');
+const postDetailMsg = document.getElementById('postDetailMsg');
+const postDetailErr = document.getElementById('postDetailErr');
+const btnBack = document.getElementById('btnBack');
+const btnMypage = document.getElementById('btnMypage');
+const btnLogout = document.getElementById('btnLogout');
+
+// 댓글 관련
+const commentList = document.getElementById('commentList');
+const commentForm = document.getElementById('commentForm');
+const commentInput = document.getElementById('commentInput');
+const commentMsg = document.getElementById('commentMsg');
+const commentErr = document.getElementById('commentErr');
+const commentLoginMsg = document.getElementById('commentLoginMsg');
+
+function getPostIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+}
+
+async function loadPostDetail() {
+    postDetailMsg.textContent = '';
+    postDetailErr.textContent = '';
+    document.getElementById('loadingSpinner').style.display = 'block';
+    postDetailContent.innerHTML = document.getElementById('loadingSpinner').outerHTML;
+    const postId = getPostIdFromUrl();
+    if (!postId) {
+        postDetailErr.textContent = '잘못된 접근입니다.';
+        postDetailContent.innerHTML = '';
+        return;
+    }
+    try {
+        const res = await fetch(BASE_URL + '/api/posts/' + postId, {
+            method: 'GET',
+            headers: { ...getAuthHeaders() }
+        });
+        if (!res.ok) {
+            postDetailErr.textContent = '게시글을 불러올 수 없습니다.';
+            postDetailContent.textContent = '';
+            return;
+        }
+        const post = await res.json();
+        renderPostDetail(post);
+    } catch (e) {
+        postDetailErr.textContent = '네트워크 오류';
+        postDetailContent.textContent = '';
+    }
+}
+
+function renderPostDetail(post) {
+    document.getElementById('loadingSpinner').style.display = 'none';
+    postDetailContent.style.display = 'block';
+    postDetailContent.innerHTML = `
+        <div class="title" style="font-size:1.5rem;font-weight:700;color:var(--naver-green);margin-bottom:10px;">${post.title}</div>
+        <div class="meta" style="color:#888;margin-bottom:12px;">카테고리: ${post.categoryName ?? ''} | 작성자: ${post.authorName ?? post.author ?? ''} | 작성일: ${post.createdAt ?? ''}</div>
+        <div class="excerpt" style="margin-bottom:18px;">${post.content ? post.content.replace(/\n/g,'<br>') : ''}</div>
+        <div class="chips">${post.tags && post.tags.length ? post.tags.map(tag => `<span class='chip'>#${tag}</span>`).join(' ') : ''}</div>
+    `;
+}
+
+// 댓글 관련 함수
+function isLoggedIn() {
+    return !!getToken();
+}
+
+async function loadComments() {
+    const postId = getPostIdFromUrl();
+    commentList.innerHTML = '<div style="color:#b6b8d6;text-align:center;padding:16px 0;">댓글을 불러오는 중...</div>';
+    try {
+        const res = await fetch(BASE_URL + `/comments?postId=${postId}`);
+        if (!res.ok) {
+            commentList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:16px 0;">댓글을 불러올 수 없습니다.</div>';
+            return;
+        }
+        const comments = await res.json();
+        renderComments(comments);
+    } catch (e) {
+        commentList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:16px 0;">네트워크 오류</div>';
+    }
+}
+
+function renderComments(comments) {
+    if (!comments || comments.length === 0) {
+        commentList.innerHTML = '<div style="color:#b6b8d6;text-align:center;padding:16px 0;">아직 댓글이 없습니다.</div>';
+        return;
+    }
+    commentList.innerHTML = comments.map(c => `
+        <div class="comment-item" style="border-bottom:1px solid #f0f0f0;padding:12px 0;">
+            <div style="font-weight:600;color:#03c75a;">${c.authorName ?? c.author ?? '익명'}</div>
+            <div style="margin:6px 0 4px 0;white-space:pre-line;">${c.content}</div>
+            <div style="color:#b6b8d6;font-size:.95em;">${c.createdAt ?? ''}</div>
+        </div>
+    `).join('');
+}
+
+if (isLoggedIn()) {
+    commentForm.style.display = 'flex';
+    commentLoginMsg.style.display = 'none';
+} else {
+    commentForm.style.display = 'none';
+    commentLoginMsg.style.display = 'block';
+}
+
+commentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    commentMsg.textContent = '';
+    commentErr.textContent = '';
+    commentMsg.classList.remove('show');
+    commentErr.classList.remove('show');
+    const content = commentInput.value.trim();
+    if (!content) {
+        commentErr.textContent = '댓글을 입력하세요.';
+        commentErr.classList.add('show');
+        return;
+    }
+    const postId = getPostIdFromUrl();
+    try {
+        const res = await fetch(BASE_URL + '/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify({ postId: Number(postId), content })
+        });
+        if (res.ok) {
+            commentMsg.textContent = '댓글이 등록되었습니다.';
+            commentMsg.classList.add('show');
+            commentInput.value = '';
+            loadComments();
+            setTimeout(() => { commentMsg.textContent = ''; commentMsg.classList.remove('show'); }, 1500);
+        } else {
+            const t = await res.text();
+            commentErr.textContent = t || '댓글 등록 실패';
+            commentErr.classList.add('show');
+        }
+    } catch (e) {
+        commentErr.textContent = '네트워크 오류';
+        commentErr.classList.add('show');
+    }
+});
+
+// 게시글 상세, 댓글 모두 로드
+loadPostDetail();
+loadComments();
+
+btnBack.addEventListener('click', () => window.location.href = 'postlist.html');
+btnMypage.addEventListener('click', () => window.location.href = 'mypage.html');
+btnLogout.addEventListener('click', () => {
+    localStorage.removeItem('jwt_token');
+    window.location.href = 'login.html';
+});
+</script>
+</div>
+</body>
+</html>

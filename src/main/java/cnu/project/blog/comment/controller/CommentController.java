@@ -6,6 +6,8 @@ import cnu.project.blog.comment.dto.CommentResponseDto;
 import cnu.project.blog.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -25,8 +27,8 @@ public class CommentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CommentResponseDto createComment(@RequestBody CommentRequestDto commentRequestDto){
-        return commentService.createComment(commentRequestDto);
+    public CommentResponseDto createComment(@AuthenticationPrincipal UserDetails userDetails, CommentRequestDto commentRequestDto){
+        return commentService.createComment(userDetails, commentRequestDto);
     }
 
 
@@ -41,5 +43,8 @@ public class CommentController {
         commentService.deleteComment(id);
     }
 
+
+    @GetMapping("GET /comments/posts/{postId}")
+    public List<CommentResponseDto> commentService.
 
 }

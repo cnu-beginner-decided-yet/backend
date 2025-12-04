@@ -6,6 +6,11 @@ import cnu.project.blog.post.dto.PostRequestDto;
 import cnu.project.blog.post.dto.PostResponseDto;
 import cnu.project.blog.post.repository.CategoryRepository;
 import cnu.project.blog.post.repository.PostRepository;
+import cnu.project.blog.postlike.repository.PostLikeRepository;
+import cnu.project.blog.postlike.service.PostLikeService;
+import cnu.project.blog.user.User;
+import cnu.project.blog.user.UserRepository;
+import cnu.project.blog.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +29,17 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
+    private final UserService userService;
+    private final PostLikeRepository postLikeRepository;
 
     // 게시글 생성
-    public PostResponseDto createPost(PostRequestDto requestDto) {
+    public PostResponseDto createPost(PostRequestDto requestDto, String author) {
         Category category = categoryRepository.findById(requestDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("카테고리 없음"));
+        User authorUser = userService.findUserByEmail(author);
 
         Post post = Post.builder()
+                .author(authorUser)
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
                 .category(category)
@@ -51,6 +60,17 @@ public class PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글 없음"));
         return toDto(post);
+    }
+
+    public List<PostResponseDto> findPostsByAuthorId(Long userId) {
+
+        // 1. userId를 사용하여 User 엔티티를 찾습니다.
+        User author = userService.findUserById(userId);
+
+        // 2. 해당 User 엔티티를 기준으로 게시글 목록을 조회합니다.
+        return postRepository.findAllByAuthor(author).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     // 게시글 수정
@@ -74,20 +94,6 @@ public class PostService {
     // 게시글 삭제
     public void deletePost(Long id) {
         postRepository.deleteById(id);
-    }
-
-    // 게시글 좋아요
-    public void likePost(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("게시글 없음"));
-        post.setLikes(post.getLikes() + 1);
-    }
-
-    // 게시글 좋아요 취소
-    public void unlikePost(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("게시글 없음"));
-        if (post.getLikes() > 0) post.setLikes(post.getLikes() - 1);
     }
 
     // 제목 검색
@@ -119,7 +125,7 @@ public class PostService {
                 .content(post.getContent())
                 .tags(post.getTags())
                 .categoryName(post.getCategory() != null ? post.getCategory().getName() : null)
-                .likes(post.getLikes())
+                .likes(postLikeRepository.countByPost(post))
                 .build();
     }
 }
