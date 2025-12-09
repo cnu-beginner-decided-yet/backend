@@ -1,9 +1,12 @@
 package cnu.project.blog.post.dto;
 
+import cnu.project.blog.user.UserResponseDto;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
+
 import java.util.List;
-import cnu.project.blog.user.User;
 
 /**
  * 게시글 응답 DTO
@@ -21,5 +24,6 @@ public class PostResponseDto {
     private List<String> tags;
     private String categoryName;
     private long likes;
-    private User author;
+    private UserResponseDto author;
+    private LocalDateTime createdAt;
 }

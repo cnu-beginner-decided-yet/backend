@@ -3,6 +3,9 @@ package cnu.project.blog.post.domain;
 import cnu.project.blog.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,4 +48,8 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩 설정
     @JoinColumn(name = "user_id") // DB 컬럼명을 user_id로 설정
     private User author;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }
