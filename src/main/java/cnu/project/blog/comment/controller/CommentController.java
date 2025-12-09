@@ -6,6 +6,8 @@ import cnu.project.blog.comment.dto.CommentResponseDto;
 import cnu.project.blog.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -25,8 +27,8 @@ public class CommentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CommentResponseDto createComment(@RequestBody CommentRequestDto commentRequestDto){
-        return commentService.createComment(commentRequestDto);
+    public CommentResponseDto createComment(@AuthenticationPrincipal UserDetails userDetails, CommentRequestDto commentRequestDto){
+        return commentService.createComment(userDetails.getUsername(), commentRequestDto);
     }
 
 
@@ -35,11 +37,23 @@ public class CommentController {
         return commentService.updateComment(id, commentRequestDto);
     }
 
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable Long id){
         commentService.deleteComment(id);
     }
 
+
+    @GetMapping("/users/{userId}")
+    public List<CommentResponseDto> findCommentByUserEmail(@AuthenticationPrincipal UserDetails userDetails){
+        return commentService.findCommentByUserEmail(userDetails.getUsername());
+    }
+
+
+    @GetMapping("/posts/{postId}")
+    public List<CommentResponseDto> findCommentByPostId(@PathVariable Long postId){
+        return commentService.findCommentByPostId(postId);
+    }
 
 }
