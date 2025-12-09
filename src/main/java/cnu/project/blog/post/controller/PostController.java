@@ -102,4 +102,22 @@ public class PostController {
         }
     }
 
+    /**
+     * 특정 사용자(userId)의 게시글 목록을 조회합니다.
+     * 단, 해당 사용자가 '비공개(isPublic=false)' 설정인 경우 조회할 수 없습니다.
+     * GET /api/posts/user/{userId}
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PostResponseDto>> getPublicPosts(@PathVariable Long userId) {
+        try {
+            List<PostResponseDto> posts = postService.findPublicPostsByAuthorId(userId);
+            return ResponseEntity.ok(posts);
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("비공개 계정입니다.")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
 }

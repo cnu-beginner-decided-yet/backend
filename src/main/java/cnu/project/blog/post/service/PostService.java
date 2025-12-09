@@ -11,6 +11,7 @@ import cnu.project.blog.postlike.service.PostLikeService;
 import cnu.project.blog.user.User;
 import cnu.project.blog.user.UserRepository;
 import cnu.project.blog.user.UserService;
+import cnu.project.blog.user.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +74,18 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    public List<PostResponseDto> findPublicPostsByAuthorId(Long userId) {
+        User author = userService.findUserById(userId);
+
+        if (!author.isPublic()) {
+            throw new RuntimeException("비공개 계정입니다.");
+        }
+
+        return postRepository.findAllByAuthor(author).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
     // 게시글 수정
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto) {
         Post post = postRepository.findById(id)
@@ -126,7 +139,14 @@ public class PostService {
                 .tags(post.getTags())
                 .categoryName(post.getCategory() != null ? post.getCategory().getName() : null)
                 .likes(postLikeRepository.countByPost(post))
-                .author(post.getAuthor().getNickname())
+                .author(UserResponseDto.builder()
+                        .id(post.getAuthor().getId())
+                        .email(post.getAuthor().getEmail())
+                        .nickname(post.getAuthor().getNickname())
+                        .organization(post.getAuthor().getOrganization())
+                        .bio(post.getAuthor().getBio())
+                        .build())
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 }
