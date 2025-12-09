@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8" />
+    <title>새 글 작성</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body class="app">
+<div class="container">
+<header class="app-header">
+    <h1 class="app-title">새 글 작성</h1>
+    <div class="controls">
+        <button id="btnBack" class="btn secondary small">목록으로</button>
+        <button id="btnLogout" class="btn ghost small">로그아웃</button>
+    </div>
+</header>
+
+<section id="categorySection" class="card" style="margin-top:12px">
+    <h3>카테고리 선택 / 생성</h3>
+    <div id="categoryArea" style="display:flex;align-items:center;gap:12px;">
+        <select id="categorySelect" style="min-width:180px;padding:8px 12px;border-radius:6px;border:1px solid #e3e3e3;"></select>
+        <button id="btnShowCreateCategory" class="btn small" style="height:36px;">+ 새 카테고리</button>
+    </div>
+    <div id="categorySelectErr" class="err" style="margin-top:6px;"></div>
+    <div id="noCategoryMsg" class="err" style="display:none;margin-top:8px;">카테고리가 없습니다. 새 카테고리를 만들어주세요.</div>
+    <form id="createCategoryForm" class="form-row" style="display:none;margin-top:8px;align-items:center;gap:8px;">
+        <input id="newCategoryName" placeholder="카테고리 이름" required style="flex:1;min-width:120px;padding:8px 12px;border-radius:6px;border:1px solid #e3e3e3;" />
+        <button type="submit" class="btn primary small">생성</button>
+        <button id="btnCancelCreateCategory" type="button" class="btn secondary small">취소</button>
+    </form>
+    <div id="createCatMsg" class="msg" style="margin-top:4px;"></div>
+    <div id="createCatErr" class="err" style="margin-top:4px;"></div>
+</section>
+
+<section id="postSection" class="form-card mt-8" style="overflow:visible;">
+    <h3>글 내용</h3>
+    <form id="createPostForm" class="form-row" style="overflow:visible;">
+        <label for="title" style="font-weight:600;color:var(--naver-dark);margin-bottom:2px;">제목</label>
+        <input id="title" type="text" class="naver-input" placeholder="제목을 입력하세요" required />
+        <label for="content" style="font-weight:600;color:var(--naver-dark);margin-bottom:2px;">내용</label>
+        <textarea id="content" class="naver-textarea" placeholder="내용을 입력하세요" rows="8" required style="resize:vertical;overflow:auto;"></textarea>
+        <label for="tags" style="font-weight:600;color:var(--naver-dark);margin-bottom:2px;">태그</label>
+        <input id="tags" type="text" class="naver-input" placeholder="태그 (쉼표로 구분)" />
+        <div class="controls mt-8 text-right">
+            <button type="submit" class="btn primary">작성하기</button>
+        </div>
+        <div id="createMsg" class="msg"></div>
+        <div id="createErr" class="err"></div>
+    </form>
+</section>
+
+<script>
+    const BASE_URL = 'http://localhost:8080';
+    const getToken = () => localStorage.getItem('jwt_token');
+    function getAuthHeaders() {
+        const token = getToken();
+        return token ? { 'Authorization': 'Bearer ' + token } : {};
+    }
+
+    const categorySelect = document.getElementById('categorySelect');
+    const createCategoryForm = document.getElementById('createCategoryForm');
+    const btnShowCreateCategory = document.getElementById('btnShowCreateCategory');
+    const btnCancelCreateCategory = document.getElementById('btnCancelCreateCategory');
+    const noCategoryMsg = document.getElementById('noCategoryMsg');
+    const createCatMsg = document.getElementById('createCatMsg');
+    const createCatErr = document.getElementById('createCatErr');
+    const createPostForm = document.getElementById('createPostForm');
+    const createMsg = document.getElementById('createMsg');
+    const createErr = document.getElementById('createErr');
+    const btnBack = document.getElementById('btnBack');
+    const btnLogout = document.getElementById('btnLogout');
+
+    async function loadCategories() {
+        try {
+            const res = await fetch(BASE_URL + '/api/categories', { method: 'GET', headers: {...getAuthHeaders()} });
+            if (!res.ok) {
+                categorySelect.innerHTML = '';
+                noCategoryMsg.style.display = 'block';
+                return;
+            }
+            const categories = await res.json();
+            renderCategories(categories);
+        } catch (e) {
+            categorySelect.innerHTML = '';
+            noCategoryMsg.style.display = 'block';
+        }
+    }
+
+    // 카테고리 셀렉트 박스 렌더링
+    function renderCategories(categories) {
+        categorySelect.innerHTML = '';
+        if (!categories || categories.length === 0) {
+            noCategoryMsg.style.display = 'block';
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = '카테고리가 없습니다';
+            opt.disabled = true;
+            opt.selected = true;
+            categorySelect.appendChild(opt);
+            categorySelect.disabled = true;
+            return;
+        }
+        noCategoryMsg.style.display = 'none';
+        categorySelect.disabled = false;
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = '카테고리를 선택하세요';
+        defaultOpt.disabled = true;
+        defaultOpt.selected = true;
+        categorySelect.appendChild(defaultOpt);
+        categories.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id ?? c.categoryId ?? '';
+            opt.textContent = `${c.name ?? c.title ?? ('카테고리 ' + (c.id ?? ''))}`;
+            opt.style.fontWeight = '500';
+            opt.style.padding = '8px 0';
+            categorySelect.appendChild(opt);
+        });
+    }
+
+    btnShowCreateCategory.addEventListener('click', () => {
+        createCategoryForm.style.display = 'block';
+        btnShowCreateCategory.disabled = true;
+        setTimeout(() => {
+            document.getElementById('newCategoryName').focus();
+        }, 100);
+    });
+    btnCancelCreateCategory.addEventListener('click', () => {
+        createCategoryForm.style.display = 'none';
+        btnShowCreateCategory.disabled = false;
+        createCatErr.textContent = '';
+        createCatMsg.textContent = '';
+        createCategoryForm.reset();
+    });
+
+    createCategoryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        createCatMsg.textContent = '';
+        createCatErr.textContent = '';
+        const name = document.getElementById('newCategoryName').value.trim();
+        if (!name) { createCatErr.textContent = '이름을 입력하세요.'; setTimeout(()=>createCatErr.textContent='',2000); return; }
+        const token = getToken();
+        if (!token) { createCatErr.textContent = '카테고리 생성은 로그인 후 가능합니다.'; setTimeout(()=>createCatErr.textContent='',2000); return; }
+
+        const submitBtn = createCategoryForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        try {
+            const res = await fetch(BASE_URL + '/api/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify({ name })
+            });
+            if (res.ok) {
+                createCatMsg.textContent = '카테고리 생성 완료';
+                createCatErr.textContent = '';
+                createCategoryForm.reset();
+                createCategoryForm.style.display = 'none';
+                btnShowCreateCategory.disabled = false;
+                // 새로 로드하여 방금 생성한 카테고리 선택
+                const newCat = await res.json().catch(()=>null);
+                await loadCategories();
+                if (newCat && newCat.id) {
+                    setTimeout(()=> {
+                        const opt = Array.from(categorySelect.options).find(o => String(o.value) === String(newCat.id));
+                        if (opt) opt.selected = true;
+                    }, 200);
+                }
+                setTimeout(()=>{createCatMsg.textContent='';},2000);
+            } else {
+                const text = await res.text();
+                createCatErr.textContent = text || '카테고리 생성 실패';
+                setTimeout(()=>{createCatErr.textContent='';},2000);
+            }
+        } catch (e) {
+            createCatErr.textContent = '네트워크 오류';
+            setTimeout(()=>{createCatErr.textContent='';},2000);
+        }
+        submitBtn.disabled = false;
+    });
+
+    createPostForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        createMsg.textContent = '';
+        createErr.textContent = '';
+        document.getElementById('categorySelectErr').textContent = '';
+        const token = getToken();
+        if (!token) { createErr.textContent = '로그인이 필요합니다.'; return; }
+        // 카테고리 선택 필수 체크
+        if (!categorySelect.value) {
+            document.getElementById('categorySelectErr').textContent = '카테고리를 선택하세요.';
+            categorySelect.focus();
+            return;
+        }
+
+        const body = {
+            title: document.getElementById('title').value.trim(),
+            content: document.getElementById('content').value.trim(),
+            tags: (document.getElementById('tags').value || '').split(',').map(s=>s.trim()).filter(Boolean),
+            categoryId: Number(categorySelect.value)
+        };
+
+        try {
+            const res = await fetch(BASE_URL + '/api/posts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) {
+                createMsg.textContent = '작성 완료';
+                createErr.textContent = '';
+                createPostForm.reset();
+                document.getElementById('categorySelectErr').textContent = '';
+                setTimeout(() => window.location.href = 'postlist.html', 700);
+            } else {
+                const t = await res.text();
+                createErr.textContent = t || '작성 실패';
+            }
+        } catch (e) {
+            createErr.textContent = '네트워크 오류';
+        }
+    });
+
+    btnBack.addEventListener('click', () => window.location.href = 'postlist.html');
+    btnLogout.addEventListener('click', () => {
+        localStorage.removeItem('jwt_token');
+        window.location.href = 'login.html';
+    });
+
+    // 초기 로드
+    loadCategories();
+</script>
+</div>
+</body>
+</html>
