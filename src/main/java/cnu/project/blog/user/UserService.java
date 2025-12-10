@@ -104,5 +104,39 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
     }
+    /**
+     * 내 정보 조회 기능: 이메일로 User 엔티티를 찾고, UserResponseDto로 변환하여 반환합니다.
+     */
+    public UserResponseDto getUserInfoByEmail(String email) {
+        User user = findUserByEmail(email);
+        return UserResponseDto.from(user);
+    }
 
+    /**
+     * 타인 프로필 조회 기능 (닉네임 기반) 💡
+     * 닉네임으로 User 엔티티를 찾고, UserResponseDto로 변환하여 반환합니다.
+     */
+    public UserProfilePublicDto getUserInfoByNickname(String nickname) {
+        User user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with nickname: " + nickname));
+        // 💡 UserProfilePublicDto.from()을 사용하여 민감 정보를 제외하고 반환
+        return UserProfilePublicDto.from(user);
+    }
+
+    /**
+     * 개인 정보 수정 기능 (Transactional) 💡
+     * 이메일을 통해 사용자를 찾고, DTO를 기반으로 정보를 업데이트합니다.
+     */
+    @Transactional // 수정 트랜잭션은 readOnly=false여야 합니다.
+    public UserResponseDto updateUserInfo(String email, UserUpdateRequestDto updateDto) {
+        User user = findUserByEmail(email);
+
+        // 엔티티의 update 메서드를 사용하여 정보 수정 (User 엔티티에 해당 메서드가 있다고 가정)
+        user.updateProfile(updateDto.getNickname(), updateDto.getOrganization(), updateDto.getBio());
+
+        // (저장 로직은 JPA Dirty Checking에 의해 자동으로 처리되므로, 별도의 save 호출이 필요 없습니다.)
+
+        // 수정된 정보를 DTO로 변환하여 반환
+        return UserResponseDto.from(user);
+    }
 }
