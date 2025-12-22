@@ -102,6 +102,9 @@ JWT 기반 인증을 적용하여 실제 서비스 구조를 경험하는 것을
 
 <img width="1315" height="704" alt="image" src="https://github.com/user-attachments/assets/1b8d2ce4-c70f-45ac-b892-8b96ca4ba487" />
 
+- 카테고리별 게시글 조회 화면
+
+<img width="2640" height="1554" alt="image" src="https://github.com/user-attachments/assets/8adf058f-f77b-4096-8a28-5191fbc16e12" />
 
 - 게시글 상세 페이지
 
@@ -111,6 +114,8 @@ JWT 기반 인증을 적용하여 실제 서비스 구조를 경험하는 것을
 
 <img width="2640" height="2262" alt="image" src="https://github.com/user-attachments/assets/aca7f7c4-50b3-4ad1-bfcf-4d003f3491ee" />
 
+새로운 카테고리를 추가할 수 있습니다.
+
 
 ### 댓글 기능
 - 게시글 댓글 조회 화면 및 댓글 작성 화면
@@ -118,12 +123,16 @@ JWT 기반 인증을 적용하여 실제 서비스 구조를 경험하는 것을
 <img width="1315" height="729" alt="image" src="https://github.com/user-attachments/assets/097ca913-7986-4a51-b0ae-8c931f87f8f3" />
 
 
-### 카테고리
+### 유저 정보
+- 내 정보 조회
 
-- 카테고리별 게시글 조회 화면
+<img width="2640" height="1468" alt="image" src="https://github.com/user-attachments/assets/f69f14db-6fe3-442e-843b-052ccf9f454d" />
 
-<img width="2640" height="1554" alt="image" src="https://github.com/user-attachments/assets/8adf058f-f77b-4096-8a28-5191fbc16e12" />
+- 유저 정보 조회
 
+<img width="2640" height="1468" alt="image" src="https://github.com/user-attachments/assets/835d1e83-6cca-4b91-a898-dd82598bbe26" />
+
+유저가 작성한 글을 조회할 수 있습니다.
 
 ---
 
