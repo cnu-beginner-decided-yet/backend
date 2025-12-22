@@ -3,6 +3,8 @@ package cnu.project.blog.post.repository;
 import cnu.project.blog.post.domain.Post;
 import cnu.project.blog.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByTitleContaining(String keyword);
     List<Post> findByContentContaining(String keyword);
-    List<Post> findByTagsContaining(String tag);
     List<Post> findAllByAuthor(User author);
+    @Query("SELECT DISTINCT p FROM Post p JOIN p.tags t WHERE UPPER(t) = UPPER(:tag)")
+    List<Post> findByTagIgnoreCase(@Param("tag") String tag);
 }

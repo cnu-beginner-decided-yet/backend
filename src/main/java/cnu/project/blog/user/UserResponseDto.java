@@ -1,15 +1,13 @@
 package cnu.project.blog.user;
 import cnu.project.blog.user.User;
-import lombok.Builder;
-import lombok.Getter;
 
+import lombok.*;
 import java.time.LocalDateTime;
 
-/**
- * 사용자 정보 조회 응답 DTO
- * - 민감한 정보(password 등)는 제외하고 필요한 정보만 노출
- */
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UserResponseDto {
     private Long id;

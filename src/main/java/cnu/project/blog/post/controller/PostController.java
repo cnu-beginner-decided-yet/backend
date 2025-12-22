@@ -61,6 +61,11 @@ public class PostController {
         return postService.searchByContent(keyword);
     }
 
+    @GetMapping("/search/{author_id}")
+    public List<PostResponseDto> searchByAuthor(@PathVariable Long author_id) {
+        return postService.findPostsByAuthorId(author_id);
+    }
+
     @GetMapping("/search/tag")
     public List<PostResponseDto> searchByTag(@RequestParam String tag) {
         return postService.searchByTag(tag);
@@ -94,6 +99,24 @@ public class PostController {
         } catch (IllegalArgumentException e) {
             // 해당 이메일의 사용자가 DB에 없는 경우 (404 처리)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    /**
+     * 특정 사용자(userId)의 게시글 목록을 조회합니다.
+     * 단, 해당 사용자가 '비공개(isPublic=false)' 설정인 경우 조회할 수 없습니다.
+     * GET /api/posts/user/{userId}
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PostResponseDto>> getPublicPosts(@PathVariable Long userId) {
+        try {
+            List<PostResponseDto> posts = postService.findPublicPostsByAuthorId(userId);
+            return ResponseEntity.ok(posts);
+        } catch (RuntimeException e) {
+            if (e.getMessage().equals("비공개 계정입니다.")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
