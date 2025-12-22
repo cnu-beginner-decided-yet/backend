@@ -7,6 +7,7 @@ import cnu.project.blog.post.dto.PostResponseDto;
 import cnu.project.blog.post.repository.CategoryRepository;
 import cnu.project.blog.post.repository.PostRepository;
 import cnu.project.blog.postlike.repository.PostLikeRepository;
+import cnu.project.blog.user.UserResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +80,7 @@ public class CategoryService {
                         .tags(post.getTags())
                         .categoryName(post.getCategory().getName())
                         .likes(postLikeRepository.countByPost(post))
+                        .author(UserResponseDto.from(post.getAuthor()))
                         .build())
                 .collect(Collectors.toList());
     }

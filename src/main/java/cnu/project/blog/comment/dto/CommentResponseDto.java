@@ -2,6 +2,7 @@ package cnu.project.blog.comment.dto;
 
 
 import cnu.project.blog.comment.entity.Comment;
+import cnu.project.blog.user.UserResponseDto;
 import lombok.*;
 
 import java.util.List;
@@ -17,13 +18,15 @@ public class CommentResponseDto {
     String content;
     Long postId;
     Long userId;
+    UserResponseDto author;
 
-    public static CommentResponseDto from(Comment comment){
+    public static CommentResponseDto from(Comment comment) {
         return CommentResponseDto.builder()
                 .id(comment.getId())
                 .userId(comment.getUser().getId())
                 .postId(comment.getPost().getId())
                 .content(comment.getContent())
+                .author(UserResponseDto.from(comment.getUser()))
                 .build();
     }
 

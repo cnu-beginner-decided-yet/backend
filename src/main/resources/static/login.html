@@ -7,17 +7,23 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="app centered">
-<div class="form-card">
-    <h1 class="app-title">로그인</h1>
-    <form id="loginForm" class="form-row">
-        <label>이메일
+<div class="form-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:400px;margin:60px auto 0 auto;box-shadow:0 4px 18px rgba(3,199,90,0.10);border-radius:18px;">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;gap:2px;margin-bottom:18px;">
+        <h1 class="app-form-title" style="margin-bottom:0;font-size:2.2rem;">CNU BLOG</h1>
+        <h2 class="app-subtitle" style="font-size:1.18rem;font-weight:600;color:#03c75a;margin-bottom:0;margin-top:0;padding-top:0;letter-spacing:-1px;">로그인하기</h2>
+    </div>
+    <form id="loginForm" class="form-row" style="width:100%;max-width:320px;">
+        <label style="width:100%;">이메일
             <input type="email" id="email" required />
         </label>
-        <label>비밀번호
+        <label style="width:100%;">비밀번호
             <input type="password" id="password" required />
         </label>
-        <button type="submit" class="btn primary">로그인</button>
+        <button type="submit" class="btn primary" style="width:100%;margin-top:8px;">로그인</button>
     </form>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:18px;width:100%;">
+        <button id="btnSignup" class="btn secondary" style="width:100%;max-width:320px;">회원가입하러 하기</button>
+    </div>
     <div class="msg" id="msg"></div>
     <div class="err" id="err"></div>
 </div>
@@ -70,6 +76,10 @@
         } catch (e) {
             err.textContent = '네트워크 오류';
         }
+    });
+
+    document.getElementById('btnSignup').addEventListener('click', () => {
+        window.location.href = 'signup.html';
     });
 </script>
 </body>

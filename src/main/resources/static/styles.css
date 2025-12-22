@@ -83,11 +83,21 @@ body.app{
 .app-logo{
     width:44px;height:44px;border-radius:10px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;box-shadow:var(--shadow);
 }
-.app-title{
-    font-size:2rem;
+.app-form-title{
     font-weight:700;
     letter-spacing:-1px;
-    color:#fff;
+    background: linear-gradient(90deg, #03c75a 0%, #00bfae 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow:0 2px 8px rgba(3,199,90,0.18);
+    display:flex;align-items:center;gap:10px;
+}
+.app-title{
+    font-weight:700;
+    letter-spacing:-1px;
+    color: #fff;
+    background-clip: text;
     text-shadow:0 2px 8px rgba(3,199,90,0.18);
     display:flex;align-items:center;gap:10px;
 }

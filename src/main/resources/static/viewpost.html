@@ -130,7 +130,10 @@ async function loadComments() {
     const postId = getPostIdFromUrl();
     commentList.innerHTML = '<div style="color:#b6b8d6;text-align:center;padding:16px 0;">댓글을 불러오는 중...</div>';
     try {
-        const res = await fetch(BASE_URL + `/comments?postId=${postId}`);
+        const res = await fetch(BASE_URL + `/comments/posts/${postId}`, {
+            method: 'GET',
+            headers: { ...getAuthHeaders() }
+        });
         if (!res.ok) {
             commentList.innerHTML = '<div style="color:#ef4444;text-align:center;padding:16px 0;">댓글을 불러올 수 없습니다.</div>';
             return;
@@ -149,7 +152,9 @@ function renderComments(comments) {
     }
     commentList.innerHTML = comments.map(c => `
         <div class="comment-item" style="border-bottom:1px solid #f0f0f0;padding:12px 0;">
-            <div style="font-weight:600;color:#03c75a;">${c.authorName ?? c.author ?? '익명'}</div>
+            <div style="font-weight:600;color:#03c75a;">
+                ${c.author && c.author.nickname ? `<a href='user-profile.html?nickname=${encodeURIComponent(c.author.nickname)}' style='color:#03c75a;text-decoration:underline;cursor:pointer;'>${c.author.nickname}</a>` : '익명'}
+            </div>
             <div style="margin:6px 0 4px 0;white-space:pre-line;">${c.content}</div>
             <div style="color:#b6b8d6;font-size:.95em;">${c.createdAt ?? ''}</div>
         </div>
@@ -181,7 +186,7 @@ commentForm.addEventListener('submit', async (e) => {
         const res = await fetch(BASE_URL + '/comments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({ postId: Number(postId), content })
+            body: JSON.stringify({ postId: Number(postId), content }) // CommentRequestDto 구조에 맞게 전달
         });
         if (res.ok) {
             commentMsg.textContent = '댓글이 등록되었습니다.';

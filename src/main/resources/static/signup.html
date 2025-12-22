@@ -8,8 +8,11 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="app centered">
-  <div class="form-card">
-    <h1 class="app-title">회원가입</h1>
+  <div class="form-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:400px;margin:60px auto 0 auto;box-shadow:0 4px 18px rgba(3,199,90,0.10);border-radius:18px;">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;gap:2px;margin-bottom:18px;">
+      <h1 class="app-form-title" style="margin-bottom:0;font-size:2.2rem;">CNU BLOG</h1>
+      <h2 class="app-subtitle" style="font-size:1.18rem;font-weight:600;color:#03c75a;margin-bottom:0;margin-top:0;padding-top:0;letter-spacing:-1px;">회원가입</h2>
+    </div>
     <form id="signupForm" class="form-row">
       <label>이메일
         <input type="email" id="email" required />
