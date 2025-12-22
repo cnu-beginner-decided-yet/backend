@@ -12,6 +12,7 @@ import lombok.Getter;
 @Builder
 public class UserProfilePublicDto {
     // ID, email, createdAt 등 민감 정보는 제외
+    private Long id;
     private String nickname;
     private String organization;
     private String bio;
@@ -19,6 +20,7 @@ public class UserProfilePublicDto {
     // User 엔티티를 DTO로 변환하는 정적 팩토리 메서드
     public static UserProfilePublicDto from(User user) {
         return UserProfilePublicDto.builder()
+                .id(user.getId())
                 .nickname(user.getNickname())
                 .organization(user.getOrganization())
                 .bio(user.getBio())
