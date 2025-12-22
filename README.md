@@ -1,4 +1,4 @@
-<img width="2640" height="2262" alt="image" src="https://github.com/user-attachments/assets/aca7f7c4-50b3-4ad1-bfcf-4d003f3491ee" /># Blog Backend Project
+# Blog Backend Project
 
 ## 프로젝트 개요
 본 프로젝트는 **CNU 2025 Fall 입문 프로젝트**로 진행된  
@@ -109,7 +109,7 @@ JWT 기반 인증을 적용하여 실제 서비스 구조를 경험하는 것을
 
 - 게시글 작성 페이지
 
-<img width="2640" height="2262" alt="image" src="https://github.com/user-attachments/assets/c24409a9-0ffd-4ccf-b4dd-7cb2f6bc460d" />
+<img width="2640" height="2262" alt="image" src="https://github.com/user-attachments/assets/aca7f7c4-50b3-4ad1-bfcf-4d003f3491ee" />
 
 
 ### 댓글 기능
