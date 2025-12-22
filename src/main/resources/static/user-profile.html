@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <title>유저 프로필</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-container {
+            max-width: 420px;
+            margin: 60px auto 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px 0 #e5e5e5;
+            padding: 32px 28px 28px 28px;
+            text-align: center;
+        }
+        .profile-nickname {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #03c75a;
+            margin-bottom: 8px;
+        }
+        .profile-organization {
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .profile-bio {
+            margin: 18px 0 10px 0;
+            color: #222;
+            font-size: 1.08rem;
+            white-space: pre-line;
+        }
+        .profile-date {
+            color: #b6b8d6;
+            font-size: .95em;
+        }
+        .msg, .err { margin-top: 12px; }
+    </style>
+</head>
+<body class="app">
+<div class="container">
+    <header class="app-header">
+        <h1 class="app-title">유저 프로필</h1>
+        <div class="controls">
+            <button id="btnBack" class="btn secondary small">이전</button>
+        </div>
+    </header>
+    <section class="profile-container" id="profileContainer">
+        <div id="profileLoading" style="color:#03c75a;">불러오는 중...</div>
+        <div id="profileContent" style="display:none;"></div>
+        <div id="profileMsg" class="msg"></div>
+        <div id="profileErr" class="err"></div>
+    </section>
+    <section class="card" id="userPostsSection" style="max-width: 700px; margin: 32px auto 0 auto;">
+        <h3 style="margin-bottom:10px;">작성한 글</h3>
+        <div id="userPostsLoading" style="color:#03c75a;">불러오는 중...</div>
+        <div id="userPostsList"></div>
+        <div id="userPostsErr" class="err"></div>
+    </section>
+</div>
+<script>
+const BASE_URL = 'http://localhost:8080';
+const getToken = () => localStorage.getItem('jwt_token');
+function getAuthHeaders() {
+    const token = getToken();
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+}
+
+const profileContent = document.getElementById('profileContent');
+const profileMsg = document.getElementById('profileMsg');
+const profileErr = document.getElementById('profileErr');
+const profileLoading = document.getElementById('profileLoading');
+const btnBack = document.getElementById('btnBack');
+const userPostsList = document.getElementById('userPostsList');
+const userPostsLoading = document.getElementById('userPostsLoading');
+const userPostsErr = document.getElementById('userPostsErr');
+
+function getNicknameFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('nickname');
+}
+
+async function loadUserProfile() {
+    profileMsg.textContent = '';
+    profileErr.textContent = '';
+    profileContent.style.display = 'none';
+    profileLoading.style.display = 'block';
+    const nickname = getNicknameFromUrl();
+    if (!nickname) {
+        profileErr.textContent = '닉네임 정보가 없습니다.';
+        profileLoading.style.display = 'none';
+        return;
+    }
+    try {
+        const res = await fetch(BASE_URL + '/users/profile/profile?nickname=' + encodeURIComponent(nickname), {
+            method: 'GET',
+            headers: { ...getAuthHeaders() }
+        });
+        if (!res.ok) {
+            profileErr.textContent = '유저 정보를 불러올 수 없습니다.';
+            profileLoading.style.display = 'none';
+            return;
+        }
+        const user = await res.json();
+        renderUserProfile(user);
+    } catch (e) {
+        profileErr.textContent = '네트워크 오류';
+        profileLoading.style.display = 'none';
+    }
+}
+
+function renderUserProfile(user) {
+    profileLoading.style.display = 'none';
+    profileContent.style.display = 'block';
+    profileContent.innerHTML = `
+        <div class="profile-nickname">${user.nickname ?? ''}</div>
+        <div class="profile-organization">${user.organization ? user.organization : ''}</div>
+        <div class="profile-bio">${user.bio ? user.bio : '<span style=\'color:#b6b8d6\'>소개가 없습니다.</span>'}</div>
+    `;
+}
+
+async function loadUserPosts(nickname) {
+    userPostsErr.textContent = '';
+    userPostsList.innerHTML = '';
+    userPostsLoading.style.display = 'block';
+    try {
+        // 1. 닉네임으로 userId 조회
+        const resUser = await fetch(BASE_URL + '/users/profile/profile?nickname=' + encodeURIComponent(nickname), {
+            method: 'GET', headers: { ...getAuthHeaders() }
+        });
+        if (!resUser.ok) throw new Error('유저 정보 조회 실패');
+        const user = await resUser.json();
+        if (!user || !user.id) throw new Error('유저 ID 없음');
+        // 2. userId로 게시글 조회
+        const resPosts = await fetch(BASE_URL + `/api/posts/user/${user.id}`);
+        if (!resPosts.ok) throw new Error('게시글 조회 실패');
+        const posts = await resPosts.json();
+        renderUserPosts(posts);
+    } catch (e) {
+        userPostsErr.textContent = '작성한 글을 불러올 수 없습니다.';
+    } finally {
+        userPostsLoading.style.display = 'none';
+    }
+}
+
+function renderUserPosts(posts) {
+    if (!posts || posts.length === 0) {
+        userPostsList.innerHTML = '<div style="color:#b6b8d6;text-align:center;padding:16px 0;">작성한 글이 없습니다.</div>';
+        return;
+    }
+    userPostsList.innerHTML = posts.map(p => `
+        <div class="post-item" style="border-bottom:1px solid #f0f0f0;padding:12px 0;cursor:pointer;" onclick="window.location.href='viewpost.html?id=${p.id}'">
+            <div style="font-weight:600;color:#03c75a;">${p.title ?? '(제목 없음)'}</div>
+            <div style="margin:6px 0 4px 0;white-space:pre-line;">${p.content ? p.content.substring(0, 80) + (p.content.length > 80 ? '...' : '') : ''}</div>
+            <div style="color:#b6b8d6;font-size:.95em;">${p.createdAt ?? ''}</div>
+        </div>
+    `).join('');
+}
+
+btnBack.addEventListener('click', () => window.history.back());
+
+loadUserProfile();
+loadUserPosts(getNicknameFromUrl());
+</script>
+</body>
+</html>

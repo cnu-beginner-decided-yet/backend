@@ -108,9 +108,14 @@ async function loadPostDetail() {
 function renderPostDetail(post) {
     document.getElementById('loadingSpinner').style.display = 'none';
     postDetailContent.style.display = 'block';
+    const authorNickname = post.author && post.author.nickname ? post.author.nickname : (post.authorName ?? post.author ?? '');
     postDetailContent.innerHTML = `
         <div class="title" style="font-size:1.5rem;font-weight:700;color:var(--naver-green);margin-bottom:10px;">${post.title}</div>
-        <div class="meta" style="color:#888;margin-bottom:12px;">카테고리: ${post.categoryName ?? ''} | 작성자: ${post.authorName ?? post.author ?? ''} | 작성일: ${post.createdAt ?? ''}</div>
+        <div class="meta" style="color:#888;margin-bottom:12px;">
+            카테고리: ${post.categoryName ?? ''} |
+            작성자: <a href="user-profile.html?nickname=${encodeURIComponent(authorNickname)}" style="color:#03c75a;font-weight:600;text-decoration:underline;cursor:pointer;">${authorNickname}</a> |
+            작성일: ${post.createdAt ?? ''}
+        </div>
         <div class="excerpt" style="margin-bottom:18px;">${post.content ? post.content.replace(/\n/g,'<br>') : ''}</div>
         <div class="chips">${post.tags && post.tags.length ? post.tags.map(tag => `<span class='chip'>#${tag}</span>`).join(' ') : ''}</div>
     `;
